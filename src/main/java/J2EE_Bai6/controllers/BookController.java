@@ -67,23 +67,10 @@ public class BookController {
 
         if (file != null && !file.isEmpty()) {
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename().replaceAll("\\s+", "_");
-            java.nio.file.Path imagesPath = getProjectImagesPath();
-            File folder = imagesPath.toFile();
-            if (!folder.exists() && !folder.mkdirs()) {
-                model.addAttribute("uploadError", "Could not create upload directory: " + imagesPath);
-                model.addAttribute("categories", categoryService.getAllCategories());
-                return "book/create";
-            }
-            File dest = imagesPath.resolve(fileName).toFile();
-            try {
-                file.transferTo(dest);
-                book.setImage(fileName);
-            } catch (IOException e) {
-                e.printStackTrace();
-                model.addAttribute("uploadError", "Failed to save image: " + e.getMessage());
-                model.addAttribute("categories", categoryService.getAllCategories());
-                return "book/create";
-            }
+            File folder = new File("src/main/resources/static/images");
+            folder.mkdirs();
+            file.transferTo(new File(folder, fileName));
+            book.setImage(fileName);
         }
         bookService.saveBook(book);
         return "redirect:/books";

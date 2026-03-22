@@ -43,8 +43,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
             .requestMatchers("/", "/home", "/login", "/error", "/css/**", "/js/**", "/images/**").permitAll()
-            .requestMatchers("/books").hasAnyRole("USER", "ADMIN")
-            .requestMatchers("/books/**").hasRole("ADMIN")
+            .requestMatchers("/books", "/books/**").hasAnyRole("USER", "ADMIN")
             .anyRequest().authenticated()
         )
         .formLogin(withDefaults())
