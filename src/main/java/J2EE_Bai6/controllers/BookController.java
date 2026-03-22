@@ -1,6 +1,7 @@
 package J2EE_Bai6.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.BindingResult;
@@ -40,7 +41,10 @@ public class BookController {
         model.addAttribute("categories", categoryService.getAllCategories());
         return "book/create";
     }
-    
+
+    @Value("${app.upload.dir}")
+    private String uploadDir;
+
     @SuppressWarnings("null")
     @PostMapping("/create")
     public String create(@Valid @ModelAttribute("book") Book book,
@@ -54,7 +58,7 @@ public class BookController {
 
         if (file != null && !file.isEmpty()) {
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename().replaceAll("\\s+", "_");
-            File folder = new File("src/main/resources/static/images");
+            File folder = new File(uploadDir);
             folder.mkdirs();
             file.transferTo(new File(folder, fileName));
             book.setImage(fileName);
@@ -85,10 +89,10 @@ public class BookController {
         }
         Book existing = bookService.getBookById(book.getId());
         if (file != null && !file.isEmpty()) {
-            File uploadFolder = new File("src/main/resources/static/images");
-            uploadFolder.mkdirs();
+            File folder = new File(uploadDir);
+            folder.mkdirs();
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            file.transferTo(new File(uploadFolder, fileName));
+            file.transferTo(new File(folder, fileName));
             book.setImage(fileName);
         } else if (existing != null) {
             book.setImage(existing.getImage());
