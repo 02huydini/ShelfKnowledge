@@ -38,6 +38,7 @@ public class SecurityConfig {
                                  "/css/**", "/js/**", "/images/**").permitAll()
                 .requestMatchers("/books").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/books/**").hasRole("ADMIN")
+                .requestMatchers("/cart/**", "/checkout/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(withDefaults())

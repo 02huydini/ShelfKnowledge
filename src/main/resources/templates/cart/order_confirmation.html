@@ -1,0 +1,51 @@
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{book/_layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>Đặt hàng thành công</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <div class="container body-content" style="max-width: 720px;">
+
+    <div class="alert alert-success mt-3">
+      Đặt hàng thành công! Mã đơn hàng: <strong th:text="'#' + ${order.id}"></strong>
+    </div>
+
+    <h5 class="mb-3">Chi tiết đơn hàng</h5>
+    <table class="table table-bordered">
+      <thead class="table-light">
+        <tr>
+          <th>Tên sách</th>
+          <th class="text-end">Đơn giá</th>
+          <th class="text-center">Số lượng</th>
+          <th class="text-end">Thành tiền</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="detail : ${order.orderDetails}">
+          <td th:text="${detail.book.name}"></td>
+          <td class="text-end" th:text="${#numbers.formatInteger(detail.unitPrice, 0, 'COMMA')}"></td>
+          <td class="text-center" th:text="${detail.quantity}"></td>
+          <td class="text-end" th:text="${#numbers.formatInteger(detail.lineTotal, 0, 'COMMA')}"></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" class="text-end fw-bold">Tổng cộng</td>
+          <td class="text-end fw-bold"
+              th:text="${#numbers.formatInteger(order.totalAmount, 0, 'COMMA')}"></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="text-muted small mb-4"
+         th:text="'Ngày đặt: ' + ${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">
+    </div>
+
+    <a th:href="@{/books}" class="btn btn-primary">Tiếp tục mua sắm</a>
+  </div>
+</div>
+</body>
+</html>

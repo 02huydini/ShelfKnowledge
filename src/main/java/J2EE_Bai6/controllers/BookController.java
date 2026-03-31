@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.ui.Model;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
@@ -14,8 +17,6 @@ import java.util.UUID;
 import J2EE_Bai6.models.*;
 import J2EE_Bai6.service.*;
 import jakarta.validation.Valid;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/books")
@@ -28,9 +29,38 @@ public class BookController {
     private CategoryService categoryService;
 
     @GetMapping
-    public String listBooks(Model model) {
-        List<Book> bookList = bookService.getAllBooks();
-        model.addAttribute("books", bookList);
+    public String listBooks(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "categoryId", required = false) Integer categoryId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "sort", defaultValue = "asc") String sort,
+            Model model
+    ) {
+        int pageSize = 5;
+        String trimmedKeyword = (keyword == null) ? null : keyword.trim();
+        boolean descending = "desc".equalsIgnoreCase(sort);
+        Sort sortByPrice = Sort.by(descending ? Sort.Direction.DESC : Sort.Direction.ASC, "price");
+        PageRequest pageable = PageRequest.of(Math.max(page, 0), pageSize, sortByPrice);
+
+        Page<Book> booksPage;
+        boolean hasKeyword = trimmedKeyword != null && !trimmedKeyword.isEmpty();
+        boolean hasCategory = categoryId != null;
+
+        if (hasKeyword && hasCategory) {
+            booksPage = bookService.searchBooksByCategoryAndKeyword(categoryId, trimmedKeyword, pageable);
+        } else if (hasKeyword) {
+            booksPage = bookService.searchBooksByKeyword(trimmedKeyword, pageable);
+        } else if (hasCategory) {
+            booksPage = bookService.filterBooksByCategory(categoryId, pageable);
+        } else {
+            booksPage = bookService.getAllBooks(pageable);
+        }
+
+        model.addAttribute("booksPage", booksPage);
+        model.addAttribute("keyword", trimmedKeyword == null ? "" : trimmedKeyword);
+        model.addAttribute("sort", descending ? "desc" : "asc");
+        model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("categoryId", categoryId);
         return "book/book";
     }
     @GetMapping("/create")
